@@ -1,6 +1,6 @@
 --[[
 ----
-MIRIN_PORTABLE.LUA v1.0
+MIRIN_PORTABLE.LUA v2.0
 THE QUINTESSENTIAL PORTING SCRIPT FOR MIRIN 2.0
 
 Created by Sudospective
@@ -51,75 +51,12 @@ function CorrectFOV(actor, fov)
     end
 end
 
---[[
-    ////////////////////////////////////////////////////////////////
-    // USE THESE COMPATIBLITY MODS INSTEAD OF THE NITG EQUIVALENT //
-    ////////////////////////////////////////////////////////////////
-
-    Everything else should work the same.
-    If you put in a little bit of effort, you save Kid a lot of work.
---]]
-
--- Generic Conversion
---[[
-alias
-{'targetrotationx1', 'confusionxoffset'..sm_fix}				-- Column ConfusionX
-{'targetrotationx2', 'confusionxoffset'..sm_fix + 1}
-{'targetrotationx3', 'confusionxoffset'..sm_fix + 2}
-{'targetrotationx4', 'confusionxoffset'..sm_fix + 3}
-
-{'targetrotationy1', 'confusionyoffset'..sm_fix}				-- Column ConfuionY
-{'targetrotationy2', 'confusionyoffset'..sm_fix + 1}
-{'targetrotationy3', 'confusionyoffset'..sm_fix + 2}
-{'targetrotationy4', 'confusionyoffset'..sm_fix + 3}
-
-{'targetrotationz1', 'confusionoffset'..sm_fix}					-- Column ConfusionZ
-{'targetrotationz2', 'confusionoffset'..sm_fix + 1}
-{'targetrotationz3', 'confusionoffset'..sm_fix + 2}
-{'targetrotationz4', 'confusionoffset'..sm_fix + 3}
-
-{'targetx1', 'movex'..sm_fix}									-- Column MoveX
-{'targetx2', 'movex'..sm_fix + 1}
-{'targetx3', 'movex'..sm_fix + 2}
-{'targetx4', 'movex'..sm_fix + 3}
-
-{'targety1', 'movey'..sm_fix}									-- Column MoveY
-{'targety2', 'movey'..sm_fix + 1}
-{'targety3', 'movey'..sm_fix + 2}
-{'targety4', 'movey'..sm_fix + 3}
-
-{'targetz1', 'movez'..sm_fix}									-- Column MoveZ
-{'targetz2', 'movez'..sm_fix + 1}
-{'targetz3', 'movez'..sm_fix + 2}
-{'targetz4', 'movez'..sm_fix + 3}
-
-{'targetskewx1', 'noteskewx'..sm_fix}							-- Column NoteSkewX
-{'targetskewx2', 'noteskewx'..sm_fix + 1}
-{'targetskewx3', 'noteskewx'..sm_fix + 2}
-{'targetskewx4', 'noteskewx'..sm_fix + 3}
-
-{'targetstealth1', 'dark'..sm_fix}								-- Column Dark
-{'targetstealth2', 'dark'..sm_fix + 1}
-{'targetstealth3', 'dark'..sm_fix + 2}
-{'targetstealth4', 'dark'..sm_fix + 3}
-
-{'targetreverse1', 'reverse'..sm_fix}							-- Column Reverse
-{'targetreverse2', 'reverse'..sm_fix + 1}
-{'targetreverse3', 'reverse'..sm_fix + 2}
-{'targetreverse4', 'reverse'..sm_fix + 3}
-]]--
+-- Generic Conversions
 
 {'confusionzoffset', 'confusionoffset'}							-- Confusion Z offset alias hack
 {'hidenoteflashes', 'hidenoteflash'}
 
---[[
-{'targetrotationx', 'confusionxoffset'}							-- just in case you end up typing these
-{'targetrotationy', 'confusionyoffset'}
-{'targetrotationz', 'confusionzoffset'}
-{'targetstealth', 'dark'}
-]]--
-
--- SM Specific Conversion
+-- SM Specific Conversions
 if not FUCK_EXE then
 
     -- Player Notefield
@@ -162,14 +99,17 @@ if not FUCK_EXE then
     
     -- NON-COLUMN
     for _, tween in ipairs {
-        'x',
-        'y',
-        'z',
-        'rotationx',
-        'rotationy',
-        'rotationz',
-        'skewx',
-        'skewy',
+        {'x', 1},
+        {'y', 1},
+        {'z', 1},
+        {'rotationx', 1},
+        {'rotationy', 1},
+        {'rotationz', 1},
+        {'skewx', 0.01},
+        {'skewy', 0.01},
+        {'zoomx', 0.01},
+        {'zoomy', 0.01},
+        {'zoomz', 0.01 * sm_scaleR},
     } do
         definemod {
             tween,
@@ -181,27 +121,6 @@ if not FUCK_EXE then
     end
 
     definemod
-    {
-        'zoomx',
-        function(n, pn)
-            if PN[pn] then PN[pn]:zoomx(n * 0.01) end
-        end,
-        defer = true
-    }
-    {
-        'zoomy',
-        function(n, pn)
-            if PN[pn] then PN[pn]:zoomy(n * 0.01) end
-        end,
-        defer = true
-    }
-    {
-        'zoomz',
-        function(n, pn)
-            if PN[pn] then PN[pn]:zoomz(n * 0.01 * sm_scaleR) end
-        end,
-        defer = true
-    }
     {
         'tiny',
         function(n)
@@ -233,20 +152,31 @@ if not FUCK_EXE then
         'holdtinyx1', 'holdtinyx2', 'holdtinyx3', 'holdtinyx4',
         defer = true
     }
+    --[[ Under construction, use at your own risk
+	{
+		'mini',
+		function(n)
+			if PN[pn] then PN[pn]:zoomz(PN[pn]:GetZoomZ() * (1 / (1 - n * 0.005)))
+			return n
+		end,
+		'mini',
+		defer = true
+	}
+    ]]--
 
     -- COLUMN
     for col = 1, 4 do
         for _, mod in ipairs {
-            'ConfusionXOffset',
-            'ConfusionYOffset',
-            'ConfusionZOffset',
-            'MoveX',
-            'MoveY',
-            'MoveZ',
-            'NoteSkewX',
-            'NoteSkewY',
-            'Dark',
-            'Reverse'
+            {'ConfusionXOffset', 0.01},
+            {'ConfusionYOffset', 0.01},
+            {'ConfusionZOffset', 0.01},
+            {'MoveX', 0.01},
+            {'MoveY', 0.01},
+            {'MoveZ', 0.01},
+            {'NoteSkewX', 0.01},
+            {'NoteSkewY', 0.01},
+            {'Dark', 1},
+            {'Reverse', 1}
         } do
             local modname = mod..col
             definemod {
